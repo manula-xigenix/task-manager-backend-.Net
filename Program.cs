@@ -20,7 +20,7 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// ✅ Configure Swagger with JWT Support
+// Configure Swagger with JWT Support
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
-    // 🔐 Add JWT Security Definition
+    // Add JWT Security Definition
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -56,7 +56,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// 🔐 JWT Authentication
+// JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(options =>
 {

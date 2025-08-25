@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using TaskManagementApp_Test.Data;
 using TaskManagementApp_Test.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace TaskManagementApp_Test.Controllers
 {
@@ -27,7 +28,12 @@ namespace TaskManagementApp_Test.Controllers
             if (_db.Users.Any(u => u.Username == model.Username))
                 return BadRequest("Username already exists.");
 
-            var user = new User { Username = model.Username, Password = model.Password }; // ⚠️ should hash
+            var hasher = new PasswordHasher<User>();
+            var user = new User { Username = model.Username };
+
+            
+            user.Password = hasher.HashPassword(user, model.Password);
+
             _db.Users.Add(user);
             _db.SaveChanges();
 
@@ -37,12 +43,17 @@ namespace TaskManagementApp_Test.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
-            var user = _db.Users.FirstOrDefault(u =>
-                        u.Username == model.Username && u.Password == model.Password);
-
+            var user = _db.Users.FirstOrDefault(u => u.Username == model.Username);
             if (user == null)
-                return Unauthorized();
+                return Unauthorized("Invalid username or password.");
 
+            var hasher = new PasswordHasher<User>();
+            var result = hasher.VerifyHashedPassword(user, user.Password, model.Password);
+
+            if (result == PasswordVerificationResult.Failed)
+                return Unauthorized("Invalid username or password.");
+
+           
             var token = GenerateJwtToken(user.Username);
             return Ok(new { token });
         }
