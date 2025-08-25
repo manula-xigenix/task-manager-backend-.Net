@@ -29,9 +29,8 @@ namespace TaskManagementApp_Test.Controllers
                 return BadRequest("Username already exists.");
 
             var hasher = new PasswordHasher<User>();
-            var user = new User { Username = model.Username };
+            var user = new User { Username = model.Username, Role = "User" }; 
 
-            
             user.Password = hasher.HashPassword(user, model.Password);
 
             _db.Users.Add(user);
@@ -53,12 +52,11 @@ namespace TaskManagementApp_Test.Controllers
             if (result == PasswordVerificationResult.Failed)
                 return Unauthorized("Invalid username or password.");
 
-           
-            var token = GenerateJwtToken(user.Username);
+            var token = GenerateJwtToken(user);
             return Ok(new { token });
         }
 
-        private string GenerateJwtToken(string username)
+        private string GenerateJwtToken(User user)
         {
             var jwtSettings = _config.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
@@ -66,7 +64,8 @@ namespace TaskManagementApp_Test.Controllers
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+                new Claim(ClaimTypes.Role, user.Role), // 👈 Role claim
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using TaskManagementApp_Test.Data;
+using TaskManagementApp_Test.Models;
 using TaskManagementApp_Test.Repositories;
 using TaskManagementApp_Test.Services;
 
@@ -95,5 +97,26 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Seed default Admin user if not exists
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (!db.Users.Any(u => u.Role == "Admin"))
+    {
+        var hasher = new PasswordHasher<User>();
+        var admin = new User
+        {
+            Username = "admin",
+            Role = "Admin"
+        };
+
+        admin.Password = hasher.HashPassword(admin, "Admin@123");
+
+        db.Users.Add(admin);
+        db.SaveChanges();
+    }
+}
 
 app.Run();
