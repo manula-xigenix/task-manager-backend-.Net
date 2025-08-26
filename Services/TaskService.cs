@@ -12,9 +12,11 @@ public class TaskService : ITaskService
     }
 
     public Task<IEnumerable<TaskItem>> GetAllAsync() => _repository.GetAllAsync();
-    public Task<TaskItem?> GetByIdAsync(int id) => _repository.GetByIdAsync(id);
+    public Task<TaskItem?> GetByIdAsync(Guid id) => _repository.GetByIdAsync(id);
     public Task AddAsync(TaskItem task) => _repository.AddAsync(task);
     public Task UpdateAsync(TaskItem task) => _repository.UpdateAsync(task);
-    public Task DeleteAsync(int id) => _repository.DeleteAsync(id);
+    public Task DeleteAsync(Guid id) => _repository.DeleteAsync(id);
+    public Task<IEnumerable<TaskItem>> GetByUserIdAsync(Guid userId) =>
+        _repository.GetByUserIdAsync(userId);
 }
 

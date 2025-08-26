@@ -16,7 +16,12 @@ public class TaskRepository : ITaskRepository
     public async Task<IEnumerable<TaskItem>> GetAllAsync() =>
         await _context.Tasks.ToListAsync();
 
-    public async Task<TaskItem?> GetByIdAsync(int id) =>
+    public async Task<IEnumerable<TaskItem>> GetByUserIdAsync(Guid userId) =>
+        await _context.Tasks
+            .Where(t => t.UserId == userId)
+            .ToListAsync();
+
+    public async Task<TaskItem?> GetByIdAsync(Guid id) =>
         await _context.Tasks.FindAsync(id);
 
     public async Task AddAsync(TaskItem task)
@@ -31,7 +36,7 @@ public class TaskRepository : ITaskRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(Guid id)
     {
         var task = await GetByIdAsync(id);
         if (task != null)
@@ -40,4 +45,5 @@ public class TaskRepository : ITaskRepository
             await _context.SaveChangesAsync();
         }
     }
+
 }

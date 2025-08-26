@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using TaskManagementApp_Test.DTOs;
 using TaskManagementApp_Test.Models;
 using TaskManagementApp_Test.Services;
 
@@ -16,42 +18,88 @@ public class TasksController : ControllerBase
         _service = service;
     }
 
+    private Guid GetUserId() =>
+        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    [Authorize(Roles = "Admin")]
+    private bool IsAdmin() =>
+        User.IsInRole("Admin");
+
+    [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
+    public async Task<IActionResult> GetAll()
+    {
+        if (IsAdmin())
+        {
+            return Ok(await _service.GetAllAsync());
+        }
+
+        var userId = GetUserId();
+        var tasks = await _service.GetByUserIdAsync(userId);
+        return Ok(tasks);
+    }
 
     [Authorize]
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> Get(Guid id)
     {
         var task = await _service.GetByIdAsync(id);
-        return task == null ? NotFound() : Ok(task);
+        if (task == null) return NotFound();
+
+        if (!IsAdmin() && task.UserId != GetUserId())
+            return Forbid();
+
+        return Ok(task);
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Create(TaskItem task)
+    public async Task<IActionResult> Create(TaskCreateDto dto)
     {
+        var task = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            UserId = GetUserId(),
+            Title = dto.Title,
+            Description = dto.Description,
+            IsCompleted = dto.IsCompleted,
+            DueDate = dto.DueDate
+        };
+
         await _service.AddAsync(task);
         return CreatedAtAction(nameof(Get), new { id = task.Id }, task);
     }
 
+
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, TaskItem task)
+    public async Task<IActionResult> Update(Guid id, TaskItem task)
     {
         if (id != task.Id) return BadRequest();
+
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        if (!IsAdmin() && existing.UserId != GetUserId())
+            return Forbid();
+
+        // Ensure user can't change ownership
+        task.UserId = existing.UserId;
+
         await _service.UpdateAsync(task);
         return NoContent();
     }
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        if (!IsAdmin() && existing.UserId != GetUserId())
+            return Forbid();
+
         await _service.DeleteAsync(id);
         return NoContent();
     }
 }
-

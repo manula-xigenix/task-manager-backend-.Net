@@ -4,16 +4,12 @@ namespace TaskManagementApp_Test.Models
 {
     public class User
     {
-        [Key]
-        public int Id { get; set; }
-
-        [Required]
+        public Guid Id { get; set; } = Guid.NewGuid();  // PK, auto-generated
         public string Username { get; set; } = string.Empty;
-
-        [Required]
         public string Password { get; set; } = string.Empty;
+        public string Role { get; set; } = "User";
 
-        [Required]
-        public string Role { get; set; } = "User"; 
+        public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
     }
+
 }
