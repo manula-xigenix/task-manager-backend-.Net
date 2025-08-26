@@ -24,20 +24,20 @@ public class TasksController : ControllerBase
     private bool IsAdmin() =>
         User.IsInRole("Admin");
 
+    // GET api/tasks
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         if (IsAdmin())
-        {
             return Ok(await _service.GetAllAsync());
-        }
 
         var userId = GetUserId();
         var tasks = await _service.GetByUserIdAsync(userId);
         return Ok(tasks);
     }
 
+    // GET api/tasks/{id}
     [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
@@ -51,6 +51,7 @@ public class TasksController : ControllerBase
         return Ok(task);
     }
 
+    // POST api/tasks
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create(TaskCreateDto dto)
@@ -69,26 +70,28 @@ public class TasksController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = task.Id }, task);
     }
 
-
+    // PUT api/tasks/{id}
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, TaskItem task)
+    public async Task<IActionResult> Update(Guid id, TaskUpdateDto dto)
     {
-        if (id != task.Id) return BadRequest();
-
         var existing = await _service.GetByIdAsync(id);
         if (existing == null) return NotFound();
 
         if (!IsAdmin() && existing.UserId != GetUserId())
             return Forbid();
 
-        // Ensure user can't change ownership
-        task.UserId = existing.UserId;
+        // Update only allowed fields
+        existing.Title = dto.Title;
+        existing.Description = dto.Description;
+        existing.IsCompleted = dto.IsCompleted;
+        existing.DueDate = dto.DueDate;
 
-        await _service.UpdateAsync(task);
+        await _service.UpdateAsync(existing);
         return NoContent();
     }
 
+    // DELETE api/tasks/{id}
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
