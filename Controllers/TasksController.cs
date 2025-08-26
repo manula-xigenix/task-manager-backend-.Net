@@ -17,7 +17,7 @@ public class TasksController : ControllerBase
     }
 
 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
