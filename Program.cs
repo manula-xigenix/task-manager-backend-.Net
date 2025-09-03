@@ -22,6 +22,17 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// ✅ Add CORS Policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev",
+        policy => policy
+            .WithOrigins("http://localhost:4200") // Angular dev server
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()); // optional if using cookies
+});
+
 // Configure Swagger with JWT Support
 builder.Services.AddSwaggerGen(options =>
 {
@@ -84,7 +95,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ✅ Enable CORS before Authentication/Authorization
+app.UseCors("AllowAngularDev");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

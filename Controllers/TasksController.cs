@@ -115,4 +115,53 @@ public class TasksController : ControllerBase
         await _service.DeleteAsync(id);
         return NoContent();
     }
+
+    // GET api/tasks/completed
+    [Authorize]
+    [HttpGet("completed")]
+    public async Task<IActionResult> GetCompleted()
+    {
+        if (IsAdmin())
+            return Ok(await _service.GetCompletedAsync());
+
+        var userId = GetUserId();
+        return Ok(await _service.GetCompletedByUserIdAsync(userId));
+    }
+
+    // GET api/tasks/remaining
+    [Authorize]
+    [HttpGet("remaining")]
+    public async Task<IActionResult> GetRemaining()
+    {
+        if (IsAdmin())
+            return Ok(await _service.GetRemainingAsync());
+
+        var userId = GetUserId();
+        return Ok(await _service.GetRemainingByUserIdAsync(userId));
+    }
+
+    // GET api/tasks/completed/count
+    [Authorize]
+    [HttpGet("completed/count")]
+    public async Task<IActionResult> GetCompletedCount()
+    {
+        if (IsAdmin())
+            return Ok(await _service.GetCompletedCountAsync());
+
+        var userId = GetUserId();
+        return Ok(await _service.GetCompletedCountByUserIdAsync(userId));
+    }
+
+    // GET api/tasks/remaining/count
+    [Authorize]
+    [HttpGet("remaining/count")]
+    public async Task<IActionResult> GetRemainingCount()
+    {
+        if (IsAdmin())
+            return Ok(await _service.GetRemainingCountAsync());
+
+        var userId = GetUserId();
+        return Ok(await _service.GetRemainingCountByUserIdAsync(userId));
+    }
+
 }

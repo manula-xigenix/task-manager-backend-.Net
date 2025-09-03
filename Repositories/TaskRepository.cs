@@ -93,4 +93,49 @@ public class TaskRepository : ITaskRepository
             throw new Exception($"An error occurred while deleting the task with ID {id}.", ex);
         }
     }
+
+    public async Task<IEnumerable<TaskItem>> GetCompletedAsync()
+    {
+        return await _context.Tasks.Where(t => t.IsCompleted).ToListAsync();
+    }
+
+    public async Task<IEnumerable<TaskItem>> GetRemainingAsync()
+    {
+        return await _context.Tasks.Where(t => !t.IsCompleted).ToListAsync();
+    }
+
+    public async Task<IEnumerable<TaskItem>> GetCompletedByUserIdAsync(Guid userId)
+    {
+        return await _context.Tasks
+            .Where(t => t.UserId == userId && t.IsCompleted)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<TaskItem>> GetRemainingByUserIdAsync(Guid userId)
+    {
+        return await _context.Tasks
+            .Where(t => t.UserId == userId && !t.IsCompleted)
+            .ToListAsync();
+    }
+
+    public async Task<int> GetCompletedCountAsync()
+    {
+        return await _context.Tasks.CountAsync(t => t.IsCompleted);
+    }
+
+    public async Task<int> GetRemainingCountAsync()
+    {
+        return await _context.Tasks.CountAsync(t => !t.IsCompleted);
+    }
+
+    public async Task<int> GetCompletedCountByUserIdAsync(Guid userId)
+    {
+        return await _context.Tasks.CountAsync(t => t.UserId == userId && t.IsCompleted);
+    }
+
+    public async Task<int> GetRemainingCountByUserIdAsync(Guid userId)
+    {
+        return await _context.Tasks.CountAsync(t => t.UserId == userId && !t.IsCompleted);
+    }
+
 }
