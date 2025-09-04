@@ -36,7 +36,7 @@ namespace TaskManagementApp_Test.Controllers
             _db.Users.Add(user);
             _db.SaveChanges();
 
-            return Ok("User registered successfully.");
+            return Ok(new { message = "User registered successfully." });
         }
 
         [HttpPost("login")]
@@ -64,10 +64,11 @@ namespace TaskManagementApp_Test.Controllers
 
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
                 new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim(ClaimTypes.Role, user.Role), // 👈 Role claim
+                new Claim(ClaimTypes.Role, user.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+    };
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
@@ -79,5 +80,31 @@ namespace TaskManagementApp_Test.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+
+        //private string GenerateJwtToken(User user)
+        //{
+        //    var jwtSettings = _config.GetSection("Jwt");
+        //    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+        //    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        //    var claims = new[]
+        //    {
+        //        //new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        //        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+        //        new Claim(ClaimTypes.Role, user.Role),
+        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        //    };
+
+        //    var token = new JwtSecurityToken(
+        //        issuer: jwtSettings["Issuer"],
+        //        audience: jwtSettings["Audience"],
+        //        claims: claims,
+        //        expires: DateTime.Now.AddHours(1),
+        //        signingCredentials: creds
+        //    );
+
+        //    return new JwtSecurityTokenHandler().WriteToken(token);
+        //}
     }
 }
