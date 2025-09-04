@@ -12,7 +12,7 @@ using TaskManagementApp_Test.Data;
 namespace TaskManagementApp_Test.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250826072732_InitialCreate")]
+    [Migration("20250904081505_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -38,8 +38,8 @@ namespace TaskManagementApp_Test.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()

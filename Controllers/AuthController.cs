@@ -81,30 +81,5 @@ namespace TaskManagementApp_Test.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-
-        //private string GenerateJwtToken(User user)
-        //{
-        //    var jwtSettings = _config.GetSection("Jwt");
-        //    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
-        //    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        //    var claims = new[]
-        //    {
-        //        //new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        //        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-        //        new Claim(ClaimTypes.Role, user.Role),
-        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        //    };
-
-        //    var token = new JwtSecurityToken(
-        //        issuer: jwtSettings["Issuer"],
-        //        audience: jwtSettings["Audience"],
-        //        claims: claims,
-        //        expires: DateTime.Now.AddHours(1),
-        //        signingCredentials: creds
-        //    );
-
-        //    return new JwtSecurityTokenHandler().WriteToken(token);
-        //}
     }
 }

@@ -30,7 +30,7 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:4200") // Angular dev server
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials()); // optional if using cookies
+            .AllowCredentials());
 });
 
 // Configure Swagger with JWT Support

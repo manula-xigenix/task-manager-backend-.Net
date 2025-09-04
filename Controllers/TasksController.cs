@@ -36,7 +36,7 @@ public class TasksController : ControllerBase
         var tasks = await _service.GetByUserIdAsync(userId);
 
         if (tasks == null || !tasks.Any())
-            throw new Exception("No tasks found for this user.");
+            return NotFound("No tasks found for this user.");
 
         return Ok(tasks);
     }
@@ -48,10 +48,10 @@ public class TasksController : ControllerBase
     {
         var task = await _service.GetByIdAsync(id);
         if (task == null)
-            throw new Exception($"Task with ID {id} not found.");
+            return NotFound($"Task with ID {id} not found.");
 
         if (!IsAdmin() && task.UserId != GetUserId())
-            throw new Exception("You are not authorized to access this task.");
+            return Forbid("You are not authorized to access this task.");
 
         return Ok(task);
     }
@@ -62,7 +62,7 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> Create(TaskCreateDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
-            throw new Exception("Task title is required.");
+            return BadRequest("Task title is required.");
 
         var task = new TaskItem
         {
@@ -70,7 +70,7 @@ public class TasksController : ControllerBase
             UserId = GetUserId(),
             Title = dto.Title,
             Description = dto.Description,
-            IsCompleted = dto.IsCompleted,
+            Status = dto.Status, 
             DueDate = dto.DueDate
         };
 
@@ -85,15 +85,14 @@ public class TasksController : ControllerBase
     {
         var existing = await _service.GetByIdAsync(id);
         if (existing == null)
-            throw new Exception($"Task with ID {id} not found.");
+            return NotFound($"Task with ID {id} not found.");
 
         if (!IsAdmin() && existing.UserId != GetUserId())
-            throw new Exception("You are not authorized to update this task.");
+            return Forbid("You are not authorized to update this task.");
 
-        // Update only allowed fields
         existing.Title = dto.Title;
         existing.Description = dto.Description;
-        existing.IsCompleted = dto.IsCompleted;
+        existing.Status = dto.Status;
         existing.DueDate = dto.DueDate;
 
         await _service.UpdateAsync(existing);
@@ -107,10 +106,10 @@ public class TasksController : ControllerBase
     {
         var existing = await _service.GetByIdAsync(id);
         if (existing == null)
-            throw new Exception($"Task with ID {id} not found.");
+            return NotFound($"Task with ID {id} not found.");
 
         if (!IsAdmin() && existing.UserId != GetUserId())
-            throw new Exception("You are not authorized to delete this task.");
+            return Forbid("You are not authorized to delete this task.");
 
         await _service.DeleteAsync(id);
         return NoContent();
@@ -163,5 +162,4 @@ public class TasksController : ControllerBase
         var userId = GetUserId();
         return Ok(await _service.GetRemainingCountByUserIdAsync(userId));
     }
-
 }
