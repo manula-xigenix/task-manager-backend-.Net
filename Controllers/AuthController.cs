@@ -36,7 +36,7 @@ namespace TaskManagementApp_Test.Controllers
             _db.Users.Add(user);
             _db.SaveChanges();
 
-            return Ok("User registered successfully.");
+            return Ok(new { message = "User registered successfully." });
         }
 
         [HttpPost("login")]
